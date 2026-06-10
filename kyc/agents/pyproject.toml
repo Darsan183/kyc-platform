@@ -1,0 +1,23 @@
+[project]
+name = "kyc-agents"
+version = "1.0.0"
+description = "KYC AI Agents"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.29.0",
+    "langgraph>=0.0.40",
+    "langchain>=0.1.15",
+    "pydantic>=2.6.0",
+    "psycopg2-binary>=2.9.0",
+    "neo4j>=5.17.0",
+    "redis>=5.0.0",
+    "prometheus-client>=0.20.0",
+    "easyocr>=1.7.0",
+    "pillow>=10.0.0",
+    "opencv-python-headless>=4.9.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"

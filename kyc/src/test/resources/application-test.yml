@@ -1,0 +1,26 @@
+# Test Configuration
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:16-alpine:///kycplatform
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+app:
+  security:
+    jwt:
+      secret: test-secret-key-for-testing-minimum-256-bits-change-in-prod
+      issuer: kyc-platform-test
+      expiration-time: 3600000
+
+logging:
+  level:
+    com.kyc.platform: DEBUG
+    org.hibernate.SQL: DEBUG

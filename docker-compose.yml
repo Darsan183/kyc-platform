@@ -1,0 +1,150 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: kyc/infrastructure/docker/Dockerfile.backend
+    image: kyc-platform/backend:latest
+    container_name: kyc-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/kycplatform
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - JWT_SECRET=${JWT_SECRET}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+    depends_on:
+      - postgres
+      - neo4j
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - kyc-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: kyc/infrastructure/docker/Dockerfile.frontend
+    image: kyc-platform/frontend:latest
+    container_name: kyc-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - kyc-network
+
+  agents:
+    build:
+      context: .
+      dockerfile: kyc/infrastructure/docker/Dockerfile.agents
+    image: kyc-platform/agents:latest
+    container_name: kyc-agents
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - kyc-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: kyc-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=kycplatform
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./kyc/infrastructure/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+    networks:
+      - kyc-network
+
+  neo4j:
+    image: neo4j:5-community
+    container_name: kyc-neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      - NEO4J_AUTH=neo4j/password
+    volumes:
+      - neo4j-data:/data
+    networks:
+      - kyc-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: kyc-redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    networks:
+      - kyc-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: kyc-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./kyc/infrastructure/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    networks:
+      - kyc-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: kyc-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./kyc/infrastructure/monitoring/grafana-dashboards:/etc/grafana/provisioning/dashboards
+      - grafana-data:/var/lib/grafana
+    networks:
+      - kyc-network
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: kyc-otel
+    ports:
+      - "4317:4317"
+      - "9464:9464"
+    command:
+      - "--config=/etc/otel-collector-config.yaml"
+    volumes:
+      - ./kyc/infrastructure/monitoring/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    networks:
+      - kyc-network
+
+volumes:
+  postgres-data:
+  neo4j-data:
+  redis-data:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  kyc-network:

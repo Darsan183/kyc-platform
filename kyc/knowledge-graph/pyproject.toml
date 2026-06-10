@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "kyc-knowledge-graph"
+version = "1.0.0"
+description = "Neo4j Knowledge Graph for KYC Relationship Discovery"
+authors = ["KYC Team <team@kycplatform.com>"]
+readme = "README.md"
+packages = [{include = "app", from = "."}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+neo4j = "^5.20.0"
+fastapi = "^0.110.0"
+pydantic = "^2.6.0"
+uvicorn = "^0.29.0"
+structlog = "^24.1.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,35 @@
+{
+  "dashboard": {
+    "title": "KYC Platform Overview",
+    "panels": [
+      {
+        "title": "API Requests",
+        "type": "graph",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(http_server_requests_seconds_count[5m])"
+          }
+        ]
+      },
+      {
+        "title": "Customer Risk Scores",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "avg(kyc_risk_score)"
+          }
+        ]
+      },
+      {
+        "title": "Active Cases",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "kyc_active_cases"
+          }
+        ]
+      }
+    ]
+  }
+}

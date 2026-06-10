@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kyc-frontend
+  namespace: kyc-platform
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kyc-frontend
+  template:
+    metadata:
+      labels:
+        app: kyc-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: kyc-platform/frontend:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: NEXT_PUBLIC_API_URL
+              value: "http://kyc-backend:80"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kyc-frontend
+  namespace: kyc-platform
+spec:
+  selector:
+    app: kyc-frontend
+  ports:
+    - port: 80
+      targetPort: 80
+  type: LoadBalancer
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kyc-ingress
+  namespace: kyc-platform
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  tls:
+    - hosts:
+        - kyc.platform.com
+      secretName: kyc-tls
+  rules:
+    - host: kyc.platform.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kyc-frontend
+                port:
+                  number: 80
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: kyc-backend
+                port:
+                  number: 80

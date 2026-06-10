@@ -1,0 +1,37 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'kyc-backend'
+    static_configs:
+      - targets: ['kyc-backend:8080']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 30s
+
+  - job_name: 'kyc-frontend'
+    static_configs:
+      - targets: ['kyc-frontend:80']
+    metrics_path: '/metrics'
+
+  - job_name: 'kyc-agents'
+    static_configs:
+      - targets: ['kyc-agents:8000']
+    metrics_path: '/metrics'
+
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:9187']
+
+  - job_name: 'neo4j'
+    static_configs:
+      - targets: ['neo4j:2004']
+
+rule_files:
+  - "alert.rules"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
