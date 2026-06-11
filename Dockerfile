@@ -2,7 +2,7 @@
 # This builds all services with proper paths
 
 # Stage 1: Backend Build
-FROM gradle:8.7-jdk21 AS backend-builder
+FROM maven:3.9-eclipse-temurin-21 AS backend-builder
 WORKDIR /app
 COPY kyc/pom.xml ./
 COPY kyc/src ./src

@@ -23,6 +23,9 @@ app:
       issuer: kyc-platform
       expiration-time: 3600000
       refresh-token-expiration: 86400000
+  document:
+    storage:
+      root: ${DOCUMENT_STORAGE_PATH:./documents}
 
 management:
   endpoints:
@@ -49,8 +52,3 @@ logging:
         security: INFO
   pattern:
     level: "%5p [${traceId:-}]"
-
-app:
-  document:
-    storage:
-      root: ${DOCUMENT_STORAGE_PATH:./documents}

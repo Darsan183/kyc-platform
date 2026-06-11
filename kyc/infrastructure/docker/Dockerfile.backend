@@ -1,5 +1,5 @@
 # Use specific version for reproducibility
-FROM gradle:8.7-jdk21 AS builder
+FROM maven:3.9-eclipse-temurin-21 AS builder
 
 WORKDIR /app
 

@@ -1,5 +1,6 @@
-{{- range $index, $count := .Values.backend.replicaCount }}
----
+{{/*
+Backend Template
+*/}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -7,7 +8,7 @@ metadata:
   labels:
     {{- include "kyc-platform.labels" . | nindent 4 }}
 spec:
-  replicas: {{ $count }}
+  replicas: {{ .Values.backend.replicaCount }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "kyc-platform.name" . }}
@@ -26,4 +27,17 @@ spec:
               value: "jdbc:postgresql://{{ include "kyc-platform.fullname" . }}-postgresql:5432/{{ .Values.postgresql.auth.database }}"
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}
-{{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "kyc-platform.fullname" . }}-backend
+  labels:
+    {{- include "kyc-platform.labels" . | nindent 4 }}
+spec:
+  selector:
+    app.kubernetes.io/name: {{ include "kyc-platform.name" . }}
+  ports:
+    - port: 80
+      targetPort: {{ .Values.backend.port }}
+  type: ClusterIP

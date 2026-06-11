@@ -46,34 +46,5 @@ class WorkflowEngine:
         self.workflow_registry[name] = workflow
 
 
-# workflow.py - Workflow definitions
-from app.agents.orchestrator import AgentOrchestrator
-
-
-async def kyc_onboarding_workflow(state: CaseState, orchestrator: AgentOrchestrator) -> CaseState:
-    """Standard KYC onboarding workflow."""
-    try:
-        # Prepare context
-        context = AgentContext(
-            case_id=state.case_id,
-            customer_id=state.customer_id,
-            correlation_id=state.correlation_id,
-            metadata=state.customer_data,
-            timestamp=datetime.utcnow()
-        )
-
-        # Execute through orchestrator
-        # This would normally call orchestrator.process_case()
-        # For now, we update the state with mock completion
-        state.status = AgentStatus.COMPLETED
-        state.progress = 1.0
-        state.completed_at = datetime.utcnow()
-
-        return state
-    except Exception as e:
-        state.add_error(str(e))
-        return state
-
-
 # Default workflow engine instance
 workflow_engine = WorkflowEngine()
